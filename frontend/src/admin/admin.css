@@ -1,0 +1,39 @@
+.admin-app {
+  --admin-ink: #18352d;
+  --admin-muted: #52665e;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 100svh;
+  padding: 32px;
+  background: #f4f7f3;
+  color: var(--admin-ink);
+  color-scheme: light;
+  font: 16px/1.6 system-ui, sans-serif;
+  text-align: left;
+}
+.admin-app *, .admin-app *::before, .admin-app *::after { box-sizing: border-box; }
+.admin-app .admin-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 64px; }
+.admin-app a { color: #1d5d45; }
+.admin-app .admin-brand { font-weight: 750; text-decoration: none; }
+.admin-app .admin-card { max-width: 720px; margin: 0 auto; padding: 40px; border: 1px solid #d9e2d9; border-radius: 16px; background: #fff; }
+.admin-app .admin-login { max-width: 480px; }
+.admin-app h1 { margin: 12px 0 16px; font-size: 30px; line-height: 1.2; letter-spacing: -0.6px; color: var(--admin-ink); }
+.admin-app p { margin: 0 0 16px; color: var(--admin-muted); }
+.admin-app .admin-eyebrow { margin: 0; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #1d5d45; }
+.admin-app form { display: flex; flex-direction: column; margin-top: 28px; }
+.admin-app label { margin-bottom: 6px; font-weight: 600; }
+.admin-app input { width: 100%; min-height: 46px; padding: 10px 12px; margin-bottom: 20px; border: 1px solid #9faf9f; border-radius: 7px; background: #fff; color: var(--admin-ink); font: inherit; }
+.admin-app button { min-height: 44px; padding: 10px 18px; border: 1px solid #1d5d45; border-radius: 7px; background: #1d5d45; color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+.admin-app button:hover:not(:disabled) { background: #144632; }
+.admin-app button:disabled { cursor: wait; opacity: 0.65; }
+.admin-app .admin-secondary { background: #fff; color: #1d5d45; }
+.admin-app .admin-secondary:hover { color: #fff; }
+.admin-app :focus-visible { outline: 3px solid #b57917; outline-offset: 3px; }
+.admin-app .admin-error { color: #9b2525; background: #fff0ef; padding: 12px; border-radius: 6px; }
+.admin-app .admin-notice { margin-top: 24px; margin-bottom: 0; padding: 14px; background: #eef4ed; border-radius: 7px; }
+@media (max-width: 600px) {
+  .admin-app { padding: 20px 14px; }
+  .admin-app .admin-header { margin-bottom: 32px; flex-wrap: wrap; }
+  .admin-app .admin-card { padding: 24px 20px; }
+  .admin-app h1 { font-size: 26px; }
+}

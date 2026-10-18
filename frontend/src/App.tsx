@@ -3,9 +3,14 @@ import heroImg from './assets/hero.png'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import './App.css'
+import AdminApp from './admin/AdminApp'
 
 function App() {
   const [count, setCount] = useState(0)
+
+  if (window.location.pathname === '/admin' || window.location.pathname.startsWith('/admin/')) {
+    return <AdminApp />
+  }
 
   return (
     <>
