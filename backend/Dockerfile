@@ -22,8 +22,9 @@ ENV NODE_ENV=production
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 # Full install (incl. prisma CLI) so `prisma db push` can run on boot.
+# --include=dev because NODE_ENV=production would otherwise omit devDeps.
 COPY package*.json .npmrc ./
-RUN npm ci
+RUN npm ci --include=dev
 
 COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=build /app/dist ./dist
