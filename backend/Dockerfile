@@ -31,5 +31,5 @@ COPY --from=build /app/dist ./dist
 COPY --from=build /app/prisma ./prisma
 
 EXPOSE 3000
-# Sync the schema to the DB on boot, then start the server.
-CMD ["sh", "-c", "npx prisma db push --skip-generate && node dist/main.js"]
+# Sync the schema, seed the admin (idempotent), then start the server.
+CMD ["sh", "-c", "npx prisma db push --skip-generate && npm run prisma:seed && node dist/main.js"]

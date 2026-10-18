@@ -25,7 +25,8 @@ services:
     # --include=dev is required: NODE_ENV=production makes npm omit devDeps,
     # but the build needs the Prisma CLI and @nestjs/cli.
     buildCommand: npm ci --include=dev && npx prisma generate && npm run build
-    startCommand: npx prisma db push --skip-generate && node dist/main.js
+    # Seed on boot (idempotent upsert) — the free plan has no Shell to run it manually.
+    startCommand: npx prisma db push --skip-generate && npm run prisma:seed && node dist/main.js
     healthCheckPath: /api/health
     autoDeploy: true
     envVars:
