@@ -1,0 +1,64 @@
+# Render Blueprint — provisions the backend, PostgreSQL and Redis in one click.
+# In Render: New → Blueprint → point at this repo. Everything below is free-tier.
+# The React frontend is deployed separately on Vercel (see frontend/).
+
+databases:
+  - name: feedback-db
+    databaseName: feedback
+    user: feedback
+    plan: free
+
+services:
+  # Redis / Key Value store for the BullMQ queue.
+  - type: redis
+    name: feedback-redis
+    plan: free
+    ipAllowList: [] # internal-only (reachable by the backend service)
+    maxmemoryPolicy: noeviction
+
+  # Backend API + in-process analysis worker + Telegram notifications.
+  - type: web
+    name: feedback-backend
+    runtime: node
+    rootDir: backend
+    plan: free
+    buildCommand: npm ci && npx prisma generate && npm run build
+    startCommand: npx prisma db push --skip-generate && node dist/main.js
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: RUN_WORKER
+        value: 'true'
+      - key: LLM_PROVIDER
+        value: mock
+      - key: DATABASE_URL
+        fromDatabase:
+          name: feedback-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: feedback-redis
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: QR_SIGNING_SECRET
+        generateValue: true
+      # Set these in the Render dashboard (marked sync:false so they are not
+      # committed). CORS_ORIGINS must include your Vercel frontend URL.
+      - key: CORS_ORIGINS
+        sync: false
+      - key: SEED_ADMIN_EMAIL
+        sync: false
+      - key: SEED_ADMIN_PASSWORD
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false

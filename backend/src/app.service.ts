@@ -1,8 +1,18 @@
 import { Injectable } from '@nestjs/common';
 
+export interface HealthStatus {
+  status: 'ok';
+  service: string;
+  timestamp: string;
+}
+
 @Injectable()
 export class AppService {
-  getHello(): string {
-    return 'Hello World!';
+  getHealth(): HealthStatus {
+    return {
+      status: 'ok',
+      service: 'feedback-analytics-backend',
+      timestamp: new Date().toISOString(),
+    };
   }
 }

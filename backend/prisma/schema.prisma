@@ -1,0 +1,109 @@
+// FeedbackAnalytics — data model (C4 L4: PostgreSQL via Prisma)
+// Mirrors the Feedback model + FeedbackStatus enum and the analysis types
+// (Sentiment, AspectCategory, CriticalityVerdict) from the lab design.
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// A business location (cafe, clinic, salon...). Owns QR codes and feedback.
+model Venue {
+  id        String     @id @default(uuid())
+  name      String
+  createdAt DateTime   @default(now())
+  admins    Admin[]
+  feedback  Feedback[]
+  alerts    Alert[]
+}
+
+/// Admin / manager who logs into the dashboard. Auth via JWT.
+model Admin {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  venueId      String?
+  venue        Venue?   @relation(fields: [venueId], references: [id])
+  createdAt    DateTime @default(now())
+}
+
+enum FeedbackStatus {
+  RECEIVED
+  QUEUED
+  ANALYZED
+  ANALYSIS_FAILED
+}
+
+/// A single guest review. Created without authentication via QR.
+model Feedback {
+  id        String          @id @default(uuid())
+  venueId   String
+  venue     Venue           @relation(fields: [venueId], references: [id])
+  qrCodeId  String
+  rating    Int // 1..5
+  comment   String?
+  status    FeedbackStatus  @default(RECEIVED)
+  createdAt DateTime        @default(now())
+  analysis  AnalysisResult?
+  alert     Alert?
+
+  @@index([venueId, createdAt])
+}
+
+enum Sentiment {
+  POSITIVE
+  NEUTRAL
+  NEGATIVE
+  MIXED
+}
+
+enum AspectCategory {
+  STAFF
+  FOOD
+  CLEANLINESS
+  PRICE_QUALITY
+  WAITING_TIME
+}
+
+/// Output of the analysis pipeline for one feedback item.
+model AnalysisResult {
+  id                  String         @id @default(uuid())
+  feedbackId          String         @unique
+  feedback            Feedback       @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  sentiment           Sentiment
+  confidence          Float
+  conflictProbability Float
+  isCritical          Boolean
+  reason              String?
+  createdAt           DateTime       @default(now())
+  aspects             AspectResult[]
+}
+
+/// One extracted aspect ("персонал", "кухня"...) with its local sentiment.
+model AspectResult {
+  id         String         @id @default(uuid())
+  resultId   String
+  result     AnalysisResult @relation(fields: [resultId], references: [id], onDelete: Cascade)
+  category   AspectCategory
+  sentiment  Sentiment
+  quote      String?
+}
+
+/// Log of a critical-review alert dispatched to Telegram.
+model Alert {
+  id          String    @id @default(uuid())
+  feedbackId  String    @unique
+  feedback    Feedback  @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  venueId     String
+  venue       Venue     @relation(fields: [venueId], references: [id])
+  rating      Int
+  comment     String?
+  receivedAt  DateTime
+  deliveredAt DateTime?
+  createdAt   DateTime  @default(now())
+}

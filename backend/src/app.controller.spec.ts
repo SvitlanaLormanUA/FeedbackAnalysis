@@ -14,9 +14,12 @@ describe('AppController', () => {
     appController = app.get<AppController>(AppController);
   });
 
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+  describe('health', () => {
+    it('reports an ok status', () => {
+      const health = appController.getHealth();
+      expect(health.status).toBe('ok');
+      expect(health.service).toBe('feedback-analytics-backend');
+      expect(typeof health.timestamp).toBe('string');
     });
   });
 });
