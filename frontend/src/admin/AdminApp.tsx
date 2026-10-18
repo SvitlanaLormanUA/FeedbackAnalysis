@@ -4,6 +4,7 @@ import { ApiError, login, verifySession } from './api'
 import { clearSession, readSession, saveSession, tokenExpiresAt } from './session'
 import './admin.css'
 import ReviewsPage from './ReviewsPage'
+import QrPage from './QrPage'
 
 function navigate(path: string) {
   window.location.replace(path)
@@ -119,6 +120,10 @@ export default function AdminApp() {
         <a href="/admin" className="admin-brand">FeedbackAnalytics</a>
         {token && <button className="admin-secondary" onClick={logout}>Вийти</button>}
       </header>
+      {token && status === 'ready' && !isLogin && <nav className="admin-nav" aria-label="Кабінет адміністратора">
+        <a href="/admin" aria-current={path === '/admin' ? 'page' : undefined}>Відгуки та статистика</a>
+        <a href="/admin/qr" aria-current={path === '/admin/qr' ? 'page' : undefined}>QR-код для гостей</a>
+      </nav>}
       {!token && isLogin ? <LoginPage /> : status === 'error' ? (
         <section className="admin-card">
           <h1>Не вдалося відкрити кабінет</h1>
@@ -127,6 +132,8 @@ export default function AdminApp() {
         </section>
       ) : !token || status === 'checking' || isLogin ? (
         <p role="status">Перевіряємо сесію…</p>
+      ) : path === '/admin/qr' ? (
+        <QrPage token={token} />
       ) : path !== '/admin' ? (
         <section className="admin-card"><h1>Сторінку не знайдено</h1><a href="/admin">До кабінету</a></section>
       ) : (

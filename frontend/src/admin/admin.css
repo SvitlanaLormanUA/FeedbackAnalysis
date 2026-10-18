@@ -76,3 +76,16 @@
 @media (max-width: 600px) {
   .admin-app .admin-stats-grid { grid-template-columns: 1fr; }
 }
+
+.admin-app .admin-nav { display: flex; flex-wrap: wrap; gap: 12px; max-width: 880px; margin: -32px auto 32px; }
+.admin-app .admin-nav a { padding: 8px 12px; border-radius: 6px; }
+.admin-app .admin-nav a[aria-current='page'] { background: #e3ece2; font-weight: 700; }
+.admin-app .admin-qr form { margin-bottom: 24px; }
+.admin-app .admin-qr h2 { color: var(--admin-ink); overflow-wrap: anywhere; }
+.admin-app .admin-qr-result { margin-top: 28px; }
+.admin-app .admin-qr-result img { display: block; width: 100%; max-width: 360px; height: auto; margin: 16px auto; }
+.admin-app .admin-qr-result label { display: block; }
+.admin-app .admin-qr-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-bottom: 16px; }
+@media (max-width: 600px) {
+  .admin-app .admin-nav { margin-top: 0; }
+}

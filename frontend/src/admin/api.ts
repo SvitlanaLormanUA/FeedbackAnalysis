@@ -76,3 +76,20 @@ export async function getStats(token: string, signal: AbortSignal): Promise<Venu
   }
   return stats
 }
+
+export async function getQr(token: string, table: string, signal: AbortSignal): Promise<{ token: string; url: string }> {
+  const query = table ? `?${new URLSearchParams({ table })}` : ''
+  const data = await request<{ token: string; url: string }>(`/qr${query}`, {
+    headers: { Authorization: `Bearer ${token}` }, signal,
+  })
+  try {
+    const url = new URL(data.url)
+    if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password
+      || !url.pathname.endsWith('/feedback') || !data.token || url.searchParams.get('token') !== data.token) {
+      throw new Error('Invalid QR response')
+    }
+  } catch {
+    throw new Error('Сервер повернув некоректне посилання для гостей. Спробуйте ще раз.')
+  }
+  return data
+}

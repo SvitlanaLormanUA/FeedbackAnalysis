@@ -1,6 +1,7 @@
-# Admin UI — stages 1–3
+# Admin UI — stages 1–4
 
-Routes: `/admin/login` (login), `/admin` (protected review list).
+Routes: `/admin/login` (login), `/admin` (protected review list),
+`/admin/qr` (protected guest QR generator).
 Other routes keep the existing application behavior. The guest form is not
 implemented by this stage. Navigation uses normal page loads and requires the
 SPA fallback already configured in `frontend/vercel.json`.
@@ -69,5 +70,30 @@ atomic database snapshot, so concurrent incoming reviews may briefly cause
 different totals. There is no automatic polling in this stage.
 
 Browser checks also cover changing statistics and reviews after refresh, partial
-statistics failures, recovery and empty-venue averages. QR controls belong to
-the next stage.
+statistics failures, recovery and empty-venue averages.
+
+## Guest QR codes
+
+`QrPage.tsx` requests `/qr` with an optional URL-encoded table label, then uses
+`qrcode` to render the returned URL locally as PNG. No external QR service is
+used. Changing the label clears the old result so it cannot be mistaken for a
+code for the new table. The page supports copying the guest link, selecting it
+manually if clipboard access fails, downloading PNG and opening the guest form.
+Only HTTP(S) feedback URLs with the matching returned token are accepted.
+
+The backend determines the public guest URL from the first `CORS_ORIGINS` value.
+For phone scanning, this must be an address reachable from the phone; localhost
+on a phone points to the phone itself. The frontend preserves the backend URL.
+The guest route `/feedback?token=...` still needs the team's guest-form implementation
+before the complete scan → submit → analyze → dashboard flow can be verified.
+
+Optional browser checks use the same Playwright environment variables described
+above:
+
+```sh
+node tests/admin-qr.browser.mjs
+```
+
+They cover generation, table labels, copy and manual fallback, PNG download,
+invalid URLs, errors, recovery, mobile layout and 401. Where the browser supports
+`BarcodeDetector`, the test also decodes the generated QR and checks its URL.
