@@ -1,3 +1,5 @@
+import type { ReviewsResponse } from './reviews'
+
 const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api').replace(/\/+$/, '')
 
 export class ApiError extends Error {
@@ -44,6 +46,13 @@ export async function login(email: string, password: string): Promise<string> {
 // The backend has no /auth/me. This existing protected endpoint validates access.
 export function verifySession(token: string, signal: AbortSignal): Promise<unknown> {
   return request('/stats', {
+    headers: { Authorization: `Bearer ${token}` },
+    signal,
+  })
+}
+
+export function getReviews(token: string, page: number, signal: AbortSignal): Promise<ReviewsResponse> {
+  return request(`/reviews?page=${page}&pageSize=20`, {
     headers: { Authorization: `Bearer ${token}` },
     signal,
   })

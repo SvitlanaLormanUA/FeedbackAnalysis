@@ -37,3 +37,31 @@
   .admin-app .admin-card { padding: 24px 20px; }
   .admin-app h1 { font-size: 26px; }
 }
+
+.admin-app .admin-reviews { max-width: 880px; margin: 0 auto; }
+.admin-app .admin-reviews h2 { font-size: 22px; color: var(--admin-ink); }
+.admin-app .admin-review-list { list-style: none; padding: 0; display: grid; gap: 18px; }
+.admin-app .admin-review { background: #fff; padding: 24px; border: 1px solid #d9e2d9; border-radius: 12px; overflow-wrap: anywhere; }
+.admin-app .admin-review-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
+.admin-app .admin-review-top time { color: var(--admin-muted); font-size: 14px; }
+.admin-app .admin-rating { font-size: 22px; }
+.admin-app .admin-rating span { color: #88600d; }
+.admin-app .admin-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.admin-app .admin-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; background: #eef1f0; color: #45564e; font-size: 13px; font-weight: 600; }
+.admin-app .admin-badge-critical, .admin-app .admin-sentiment-negative { color: #922c29; background: #ffebe8; }
+.admin-app .admin-sentiment-positive { color: #1c6242; background: #e9f5ec; }
+.admin-app .admin-sentiment-mixed { color: #704a0c; background: #fff3d6; }
+.admin-app .admin-review-comment { white-space: pre-wrap; color: var(--admin-ink); }
+.admin-app .admin-review-hint { font-size: 14px; margin: 10px 0 0; }
+.admin-app .admin-aspects { list-style: none; display: grid; gap: 12px; padding: 16px 0 0; margin: 0; border-top: 1px solid #e2e8e2; }
+.admin-app .admin-aspects li > div { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.admin-app .admin-aspects blockquote { margin: 8px 0 0; padding-left: 12px; border-left: 3px solid #d9e2d9; white-space: pre-wrap; color: var(--admin-muted); }
+.admin-app .admin-review-state { padding: 28px 0; }
+.admin-app .admin-review-state button { margin: 8px 12px 0 0; }
+.admin-app .admin-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 0; }
+.admin-app .admin-pagination button:disabled { cursor: default; }
+@media (max-width: 600px) {
+  .admin-app .admin-review { padding: 18px; }
+  .admin-app .admin-pagination { justify-content: center; }
+  .admin-app .admin-pagination span { order: -1; flex-basis: 100%; text-align: center; }
+}

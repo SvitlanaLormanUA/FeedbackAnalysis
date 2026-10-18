@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { ApiError, login, verifySession } from './api'
 import { clearSession, readSession, saveSession, tokenExpiresAt } from './session'
 import './admin.css'
+import ReviewsPage from './ReviewsPage'
 
 function navigate(path: string) {
   window.location.replace(path)
@@ -129,12 +130,7 @@ export default function AdminApp() {
       ) : path !== '/admin' ? (
         <section className="admin-card"><h1>Сторінку не знайдено</h1><a href="/admin">До кабінету</a></section>
       ) : (
-        <section className="admin-card">
-          <p className="admin-eyebrow">Кабінет адміністратора</p>
-          <h1>Вітаємо в FeedbackAnalytics</h1>
-          <p>Ви увійшли до кабінету вашого закладу.</p>
-          <p className="admin-notice">Список відгуків і статистика з’являться на наступних етапах.</p>
-        </section>
+        <ReviewsPage token={token} />
       )}
     </main>
   )
