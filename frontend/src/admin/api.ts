@@ -57,3 +57,22 @@ export function getReviews(token: string, page: number, signal: AbortSignal): Pr
     signal,
   })
 }
+
+export interface VenueStats {
+  venueId: string
+  totalFeedback: number
+  averageRating: number
+  criticalCount: number
+}
+
+export async function getStats(token: string, signal: AbortSignal): Promise<VenueStats> {
+  const stats = await request<VenueStats>('/stats', {
+    headers: { Authorization: `Bearer ${token}` }, signal,
+  })
+  if (!stats || !Number.isInteger(stats.totalFeedback) || stats.totalFeedback < 0
+    || !Number.isFinite(stats.averageRating) || stats.averageRating < 0 || stats.averageRating > 5
+    || !Number.isInteger(stats.criticalCount) || stats.criticalCount < 0) {
+    throw new Error('Сервер повернув некоректну статистику. Спробуйте ще раз.')
+  }
+  return stats
+}

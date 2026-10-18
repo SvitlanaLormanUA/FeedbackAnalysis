@@ -15,6 +15,9 @@ try {
     }
   }, token)
   let mode = 'normal'
+  let statsFailure = false
+  let statsCalls = 0
+  let reviewCalls = 0
   const review = (id, overrides = {}) => ({
     id, rating: 5, comment: `Відгук ${id}`, createdAt: '2026-10-18T12:00:00Z',
     status: 'ANALYZED', sentiment: 'POSITIVE', isCritical: false, aspects: [], ...overrides,
@@ -31,15 +34,22 @@ try {
   ]
   await page.route('**/api/**', async route => {
     assert.equal(route.request().headers().authorization, `Bearer ${token}`)
-    if (route.request().url().endsWith('/stats')) return route.fulfill({ json: {} })
+    if (route.request().url().endsWith('/stats')) {
+      statsCalls++
+      if (statsFailure) return route.fulfill({ status: 500, json: {} })
+      if (mode === 'updated') await new Promise(resolve => setTimeout(resolve, 200))
+      return route.fulfill({ json: { venueId: 'demo', totalFeedback: mode === 'empty' ? 0 : mode === 'updated' ? 22 : 21,
+        averageRating: mode === 'empty' ? 0 : mode === 'updated' ? 3.5 : 4.25, criticalCount: mode === 'updated' ? 2 : mode === 'empty' ? 0 : 1 } })
+    }
+    reviewCalls++
     const url = new URL(route.request().url())
     assert.equal(url.searchParams.get('pageSize'), '20')
     if (mode === 'unauthorized') return route.fulfill({ status: 401, json: {} })
     if (mode === 'error') return route.fulfill({ status: 500, json: {} })
     const number = Number(url.searchParams.get('page'))
     if (number === 2) await new Promise(resolve => setTimeout(resolve, 200))
-    return route.fulfill({ json: { page: number, pageSize: 20, total: mode === 'empty' ? 0 : 21,
-      items: mode === 'empty' ? [] : number === 1 ? firstPage : [review('last')] } })
+    return route.fulfill({ json: { page: number, pageSize: 20, total: mode === 'empty' ? 0 : mode === 'updated' ? 22 : 21,
+      items: mode === 'empty' ? [] : number === 1 ? (mode === 'updated' ? [review('new'), ...firstPage.slice(0, 19)] : firstPage) : [review('last')] } })
   })
   await page.goto(`${base}/admin`)
   await page.getByText('Критичний відгук', { exact: true }).waitFor()
@@ -65,15 +75,36 @@ try {
   mode = 'normal'
   await page.getByRole('button', { name: 'Спробувати ще раз', exact: true }).click()
   await page.getByText('Критичний відгук', { exact: true }).waitFor()
+  const statistics = page.getByRole('region', { name: 'Статистика закладу' })
+  assert.match(await statistics.innerText(), /4,25 \/ 5/)
+  mode = 'updated'
+  const beforeStats = statsCalls, beforeReviews = reviewCalls
+  await page.getByRole('button', { name: 'Оновити дані', exact: true }).click()
+  assert.equal(await page.getByRole('button', { name: 'Оновлюємо…', exact: true }).isDisabled(), true)
+  await page.getByText('Відгук new', { exact: true }).waitFor()
+  assert.match(await statistics.innerText(), /3,5 \/ 5/)
+  // Development StrictMode may start and cancel an extra mount request.
+  assert.ok(statsCalls > beforeStats && statsCalls <= beforeStats + 2)
+  assert.ok(reviewCalls > beforeReviews && reviewCalls <= beforeReviews + 2)
+  assert.equal(await statistics.locator('dd').nth(2).innerText(), '2')
+  statsFailure = true
+  await page.getByRole('button', { name: 'Оновити дані', exact: true }).click()
+  await statistics.getByRole('alert').waitFor()
+  assert.equal(await statistics.locator('dd').count(), 0)
+  assert.equal(await page.getByText('Відгук new', { exact: true }).isVisible(), true)
+  statsFailure = false
+  await page.getByRole('button', { name: 'Спробувати ще раз', exact: true }).click()
+  await statistics.getByText('3,5 / 5', { exact: true }).waitFor()
   mode = 'empty'
   await page.reload()
   await page.getByRole('heading', { name: 'Відгуків ще немає', exact: true }).waitFor()
+  assert.equal(await statistics.getByText('Немає оцінок', { exact: true }).isVisible(), true)
   assert.equal(await page.getByRole('navigation', { name: 'Сторінки відгуків' }).count(), 0)
   mode = 'unauthorized'
   await page.reload()
   await page.waitForURL('**/admin/login?reason=expired')
   assert.equal(await page.evaluate(() => sessionStorage.getItem('feedbackanalytics.admin.token')), null)
-  console.log('PASS: review fields, all analysis states, nulls, escaped text, mobile layout, pagination, loading, retry, empty state, 401 redirect')
+  console.log('PASS: statistics, coordinated refresh, partial failure and recovery, zero ratings, review fields, all analysis states, nulls, escaped text, mobile layout, pagination, loading, retry, empty state, 401 redirect')
 } finally {
   await browser.close()
 }

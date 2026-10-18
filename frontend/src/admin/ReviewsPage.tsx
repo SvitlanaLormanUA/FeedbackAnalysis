@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
-import { ApiError, getReviews } from './api'
+import { ApiError, getReviews, getStats } from './api'
+import StatisticsCards from './StatisticsCards'
+import type { VenueStats } from './api'
 import { clearSession } from './session'
 import { aspectLabels, reviewDate, sentimentLabels, statusLabels } from './reviews'
 import type { Review, ReviewsResponse } from './reviews'
@@ -38,42 +40,70 @@ function ReviewCard({ review }: { review: Review }) {
   )
 }
 
-function ReviewsContent({ token, page, onPageChange }: { token: string; page: number; onPageChange: (page: number) => void }) {
-  const [data, setData] = useState<ReviewsResponse | null>(null)
-  const [error, setError] = useState('')
-  const [attempt, setAttempt] = useState(0)
+function ReviewsContent({ token, page, onPageChange, onRefresh }: {
+  token: string; page: number; onPageChange: (page: number) => void; onRefresh: () => void
+}) {
+  const [result, setResult] = useState<{
+    reviews: ReviewsResponse | null; stats: VenueStats | null;
+    reviewsError: string; statsError: string; updatedAt: string;
+  } | null>(null)
 
   useEffect(() => {
     const controller = new AbortController()
     const timer = window.setTimeout(() => controller.abort(), 15_000)
     let active = true
-    getReviews(token, page, controller.signal).then(result => {
-      if (active) setData(result)
-    }).catch((err: unknown) => {
-      if (!active) return
-      if (err instanceof ApiError && err.status === 401) {
+    const handleFailure = (err: unknown): never => {
+      if (active && err instanceof ApiError && err.status === 401) {
         clearSession()
         window.location.replace('/admin/login?reason=expired')
-        return
       }
-      setError(err instanceof Error ? err.message : 'Не вдалося завантажити відгуки.')
+      throw err
+    }
+    // Publish both results together; one unavailable endpoint does not hide the other.
+    Promise.allSettled([
+      getReviews(token, page, controller.signal).catch(handleFailure),
+      getStats(token, controller.signal).catch(handleFailure),
+    ]).then(([reviews, stats]) => {
+      if (!active) return
+      const message = (reason: unknown) => reason instanceof Error ? reason.message : 'Не вдалося завантажити дані.'
+      setResult({
+        reviews: reviews.status === 'fulfilled' ? reviews.value : null,
+        stats: stats.status === 'fulfilled' ? stats.value : null,
+        reviewsError: reviews.status === 'rejected' ? message(reviews.reason) : '',
+        statsError: stats.status === 'rejected' ? message(stats.reason) : '',
+        updatedAt: new Date().toLocaleTimeString('uk-UA'),
+      })
     }).finally(() => window.clearTimeout(timer))
     return () => {
       active = false
       window.clearTimeout(timer)
       controller.abort()
     }
-  }, [token, page, attempt])
+  }, [token, page])
 
-  if (error) return (
-    <div className="admin-review-state">
-      <p role="alert" className="admin-error">{error}</p>
-      <button onClick={() => { setError(''); setAttempt(value => value + 1) }}>Спробувати ще раз</button>
-      {page > 1 && <button className="admin-secondary" onClick={() => onPageChange(1)}>До першої сторінки</button>}
-    </div>
+  return (
+    <>
+      <div className="admin-refresh">
+        <button disabled={!result} onClick={onRefresh}>{result ? 'Оновити дані' : 'Оновлюємо…'}</button>
+        {result && !result.reviewsError && !result.statsError && <span role="status">Дані оновлено о {result.updatedAt}</span>}
+      </div>
+      <StatisticsCards stats={result?.stats ?? null} loading={!result} error={result?.statsError ?? ''} />
+      {!result ? <p role="status" className="admin-review-state">Завантажуємо відгуки…</p> : result.reviews ? (
+        <ReviewsList data={result.reviews} page={page} onPageChange={onPageChange} />
+      ) : (
+        <div className="admin-review-state">
+          <p role="alert" className="admin-error">Не вдалося завантажити відгуки. {result.reviewsError}</p>
+          {page > 1 && <button className="admin-secondary" onClick={() => onPageChange(1)}>До першої сторінки</button>}
+        </div>
+      )}
+      {result && (result.reviewsError || result.statsError) && <button onClick={onRefresh}>Спробувати ще раз</button>}
+    </>
   )
-  if (!data) return <p role="status" className="admin-review-state">Завантажуємо відгуки…</p>
+}
 
+function ReviewsList({ data, page, onPageChange }: {
+  data: ReviewsResponse; page: number; onPageChange: (page: number) => void
+}) {
   const pages = Math.max(1, Math.ceil(data.total / data.pageSize))
   return (
     <>
@@ -96,13 +126,14 @@ function ReviewsContent({ token, page, onPageChange }: { token: string; page: nu
 
 export default function ReviewsPage({ token }: { token: string }) {
   const [page, setPage] = useState(1)
+  const [refresh, setRefresh] = useState(0)
   return (
     <section className="admin-reviews" aria-labelledby="admin-reviews-title">
       <p className="admin-eyebrow">Кабінет адміністратора</p>
       <h1 id="admin-reviews-title">Відгуки гостей</h1>
       <p>Оцінки, коментарі та результати аналізу. Спочатку найновіші.</p>
       {/* A new page gets fresh loading state. Cleanup ignores any late response. */}
-      <ReviewsContent key={`${token}-${page}`} token={token} page={page} onPageChange={setPage} />
+      <ReviewsContent key={`${token}-${page}-${refresh}`} token={token} page={page} onPageChange={setPage} onRefresh={() => setRefresh(value => value + 1)} />
     </section>
   )
 }

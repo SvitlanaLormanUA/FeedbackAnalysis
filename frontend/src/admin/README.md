@@ -1,4 +1,4 @@
-# Admin UI — stages 1 and 2
+# Admin UI — stages 1–3
 
 Routes: `/admin/login` (login), `/admin` (protected review list).
 Other routes keep the existing application behavior. The guest form is not
@@ -54,4 +54,20 @@ absolute module path. `BROWSER_EXECUTABLE` optionally selects a Chrome executabl
 cover statuses, null fields, escaped comments, pagination, retry, empty data,
 mobile overflow and a 401 redirect. They do not verify live backend responses.
 
-Statistics cards, automatic refresh and QR controls belong to subsequent stages.
+`StatisticsCards.tsx` displays total feedback, average rating and critical count
+from `/stats` for the entire venue, independent of the selected review page.
+An empty venue shows “Немає оцінок”; failed or malformed statistics never display
+as zero. Critical count refers to analyzed reviews, not Telegram deliveries.
+
+“Оновити дані” reloads both endpoints in parallel and preserves the selected page.
+The results are published together after both requests settle. A partial failure
+keeps the successful section available and allows retrying both endpoints.
+The refresh button is disabled while loading; old requests are aborted on page
+changes/unmount, and late responses are ignored. The last-update time is shown
+only when both requests succeed. Separate backend endpoints do not provide an
+atomic database snapshot, so concurrent incoming reviews may briefly cause
+different totals. There is no automatic polling in this stage.
+
+Browser checks also cover changing statistics and reviews after refresh, partial
+statistics failures, recovery and empty-venue averages. QR controls belong to
+the next stage.
