@@ -7,7 +7,8 @@ import { LlmGateway } from './llm-gateway';
  */
 @Injectable()
 export class GroqGateway implements LlmGateway {
-  private readonly model = 'llama-3.1-8b-instant';
+  // Current free-tier model; override via GROQ_MODEL (e.g. openai/gpt-oss-120b).
+  private readonly model = process.env.GROQ_MODEL ?? 'openai/gpt-oss-20b';
   private readonly timeoutMs = 10_000;
 
   constructor(private readonly apiKey: string) {}
