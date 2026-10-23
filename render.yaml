@@ -36,6 +36,10 @@ services:
         value: 'true'
       - key: LLM_PROVIDER
         value: gemini
+      # Pinned model: the `gemini-flash-latest` alias is frequently overloaded
+      # (503), which the gateway degrades to NEUTRAL. A pinned Flash is steadier.
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
       - key: DATABASE_URL
         fromDatabase:
           name: feedback-db
