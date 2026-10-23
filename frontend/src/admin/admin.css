@@ -14,7 +14,24 @@
 .admin-app *, .admin-app *::before, .admin-app *::after { box-sizing: border-box; }
 .admin-app .admin-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 64px; }
 .admin-app a { color: #1d5d45; }
-.admin-app .admin-brand { font-weight: 750; text-decoration: none; }
+.admin-app .admin-brand, .brand-logo {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 20px;
+  line-height: 1.2;
+  font-weight: 750;
+  letter-spacing: -0.4px;
+  text-decoration: none;
+  color: #18352d;
+  display: inline-flex;
+  align-items: center;
+  transition: opacity 0.15s ease;
+}
+.admin-app .admin-brand span, .brand-logo span {
+  color: #1d5d45;
+}
+.admin-app .admin-brand:hover, .brand-logo:hover {
+  opacity: 0.85;
+}
 .admin-app .admin-card { max-width: 720px; margin: 0 auto; padding: 40px; border: 1px solid #d9e2d9; border-radius: 16px; background: #fff; }
 .admin-app .admin-login { max-width: 480px; }
 .admin-app h1 { margin: 12px 0 16px; font-size: 30px; line-height: 1.2; letter-spacing: -0.6px; color: var(--admin-ink); }
@@ -50,6 +67,7 @@
 .admin-app .admin-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; background: #eef1f0; color: #45564e; font-size: 13px; font-weight: 600; }
 .admin-app .admin-badge-critical, .admin-app .admin-sentiment-negative { color: #922c29; background: #ffebe8; }
 .admin-app .admin-sentiment-positive { color: #1c6242; background: #e9f5ec; }
+.admin-app .admin-badge-table { color: #1d5d45; background: #e9f5ec; border: 1px solid #cce2d3; }
 .admin-app .admin-sentiment-mixed { color: #704a0c; background: #fff3d6; }
 .admin-app .admin-review-comment { white-space: pre-wrap; color: var(--admin-ink); }
 .admin-app .admin-review-hint { font-size: 14px; margin: 10px 0 0; }

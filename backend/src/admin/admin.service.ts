@@ -32,6 +32,7 @@ export class AdminService {
         comment: f.comment,
         status: f.status,
         createdAt: f.createdAt,
+        tableLabel: this.extractTableLabel(f.qrCodeId, f.venueId),
         sentiment: f.analysis?.sentiment ?? null,
         isCritical: f.analysis?.isCritical ?? false,
         aspects:
@@ -42,5 +43,17 @@ export class AdminService {
           })) ?? [],
       })),
     };
+  }
+
+  private extractTableLabel(qrCodeId: string, venueId: string): string | null {
+    if (!qrCodeId) return null;
+    const prefix = `${venueId}:`;
+    const raw = qrCodeId.startsWith(prefix)
+      ? qrCodeId.slice(prefix.length)
+      : qrCodeId.includes(':')
+        ? qrCodeId.slice(qrCodeId.indexOf(':') + 1)
+        : null;
+    if (!raw || raw === 'default') return null;
+    return raw;
   }
 }

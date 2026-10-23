@@ -117,7 +117,7 @@ export default function AdminApp() {
   return (
     <main className="admin-app">
       <header className="admin-header">
-        <a href="/admin" className="admin-brand">FeedbackAnalytics</a>
+        <a href="/" className="brand-logo admin-brand">Feedback<span>Analytics</span></a>
         {token && <button className="admin-secondary" onClick={logout}>Вийти</button>}
       </header>
       {token && status === 'ready' && !isLogin && <nav className="admin-nav" aria-label="Кабінет адміністратора">

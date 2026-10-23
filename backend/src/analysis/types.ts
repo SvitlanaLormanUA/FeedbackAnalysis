@@ -45,6 +45,7 @@ export interface CriticalFeedbackEvent {
   comment?: string;
   receivedAt: Date;
   reason?: string;
+  tableLabel?: string;
 }
 
 /** Job payload enqueued by AnalysisTaskDispatcher. */

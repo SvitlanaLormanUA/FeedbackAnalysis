@@ -44,16 +44,25 @@
   width: 100%;
 }
 
-.feedback-brand {
-  font-size: 19px;
+.feedback-brand, .brand-logo {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 20px;
+  line-height: 1.2;
   font-weight: 750;
-  text-decoration: none;
-  color: var(--feedback-ink);
   letter-spacing: -0.4px;
+  text-decoration: none;
+  color: #18352d;
+  display: inline-flex;
+  align-items: center;
+  transition: opacity 0.15s ease;
 }
 
-.feedback-brand span {
-  color: var(--feedback-primary);
+.feedback-brand span, .brand-logo span {
+  color: #1d5d45;
+}
+
+.feedback-brand:hover, .brand-logo:hover {
+  opacity: 0.85;
 }
 
 .feedback-admin-link {

@@ -117,10 +117,19 @@ export default function FeedbackPage() {
     setSubmitError('')
   }
 
+  function handleLogoClick(event: React.MouseEvent<HTMLAnchorElement>) {
+    if (window.location.pathname === '/' && !window.location.search) {
+      event.preventDefault()
+      handleReset()
+      setToken('')
+      setManualInput('')
+    }
+  }
+
   return (
     <main className="feedback-app">
       <header className="feedback-header">
-        <a href="/" className="feedback-brand">
+        <a href="/" className="brand-logo feedback-brand" onClick={handleLogoClick}>
           Feedback<span>Analytics</span>
         </a>
         <a href="/admin" className="feedback-admin-link">
