@@ -8,6 +8,7 @@ export interface Review {
   comment: string | null
   createdAt: string
   status: FeedbackStatus
+  tableLabel?: string | null
   sentiment: Sentiment | null
   isCritical: boolean
   aspects: Array<{ category: AspectCategory; sentiment: Sentiment; quote: string | null }>

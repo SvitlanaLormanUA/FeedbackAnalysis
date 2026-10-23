@@ -49,6 +49,14 @@ export class FeedbackAnalysisProcessor extends WorkerHost {
       await this.repo.saveOutcome(feedbackId, { sentiment, aspects, verdict }); // 5
 
       if (verdict.isCritical) {
+        const prefix = `${feedback.venueId}:`;
+        const rawTable = feedback.qrCodeId.startsWith(prefix)
+          ? feedback.qrCodeId.slice(prefix.length)
+          : feedback.qrCodeId.includes(':')
+            ? feedback.qrCodeId.slice(feedback.qrCodeId.indexOf(':') + 1)
+            : null;
+        const tableLabel = rawTable && rawTable !== 'default' ? rawTable : undefined;
+
         await this.alerts.dispatch({
           feedbackId: feedback.id,
           venueId: feedback.venueId,
@@ -56,6 +64,7 @@ export class FeedbackAnalysisProcessor extends WorkerHost {
           comment: feedback.comment ?? undefined,
           receivedAt: feedback.createdAt,
           reason: verdict.reason,
+          tableLabel,
         }); // 6
       }
     } catch (err) {

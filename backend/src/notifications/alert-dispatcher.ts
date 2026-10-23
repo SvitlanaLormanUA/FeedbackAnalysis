@@ -46,6 +46,7 @@ export class AlertDispatcher {
     return [
       '🚨 <b>Critical review</b>',
       `⭐ Rating: <b>${event.rating}/5</b>`,
+      event.tableLabel ? `📍 Table: <b>${this.escape(event.tableLabel)}</b>` : null,
       event.reason ? `⚠️ Reason: ${event.reason}` : null,
       event.comment ? `💬 ${this.escape(event.comment)}` : '💬 (no comment)',
       `🕒 ${when} UTC`,

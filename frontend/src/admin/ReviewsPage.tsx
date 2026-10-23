@@ -18,6 +18,7 @@ function ReviewCard({ review }: { review: Review }) {
           <span className="admin-badge">{statusLabels[review.status] ?? 'Невідомий статус'}</span>
           {review.isCritical && <span className="admin-badge admin-badge-critical">Критичний відгук</span>}
           {!review.isCritical && review.rating <= 2 && <span className="admin-badge admin-badge-critical">Низька оцінка</span>}
+          {review.tableLabel && <span className="admin-badge admin-badge-table">📍 {review.tableLabel}</span>}
         </div>
         <p className="admin-review-comment">{review.comment?.trim() ? review.comment : 'Без коментаря'}</p>
         <p className="admin-review-sentiment">Тональність: <span className={`admin-badge admin-sentiment-${review.sentiment?.toLowerCase() ?? 'pending'}`}>
