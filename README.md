@@ -14,7 +14,7 @@ This repo implements the C4 design from the lab: the **Backend API** and the
 
 ---
 
-## Architecture → code map
+## Architecture to the code map
 
 The backend follows the L4 class diagrams one-to-one.
 
