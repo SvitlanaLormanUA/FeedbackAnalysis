@@ -142,6 +142,38 @@ by Render.
 
 ---
 
+## Testing
+
+Run everything from `backend/`. Tests use Jest + `@nestjs/testing`.
+
+| Command | Scope | Needs Docker? |
+| ------- | ----- | ------------- |
+| `npm test` | **Unit** — pure logic & services with faked dependencies (`src/**/*.spec.ts`) | no |
+| `npm run test:integration` | **Integration** — boots a real Nest app for the feedback / auth / admin slices; only the DB and queue are faked (`test/{feedback,auth,admin}.e2e-spec.ts`) | no |
+| `npm run test:e2e` | **Full e2e** — boots the whole `AppModule` against real Postgres + Redis | yes |
+| `npm run test:cov` | Unit tests with a coverage report (`coverage/`) | no |
+
+```bash
+cd backend
+npm test                  # fast unit suite (also what CI runs)
+npm run test:integration  # HTTP + DI wiring, no infrastructure
+```
+
+**What each layer covers**
+
+- **Unit** — the analysis pipeline (`TextPreprocessor`, `SentimentClassifier`,
+  `AspectExtractor`, `CriticalityDetector`, LLM response parsers), `QrService`
+  token signing, `StatisticsService`/`AdminService` read models, and
+  `AuthService` credential checks. External boundaries (LLM, Prisma) are faked,
+  so error/fallback branches are exercised deterministically.
+- **Integration** — the real `FeedbackController → FeedbackService →
+  Repository / QrService / AnalysisTaskDispatcher` flow, the JWT login, and the
+  guarded admin routes, driven over HTTP with supertest. DTO validation, the
+  JWT auth guard and the signed-QR round-trip run for real; only Prisma and the
+  BullMQ queue are stubbed, so no Docker is required.
+- **Full e2e** — `test/app.e2e-spec.ts` boots the entire application and hits
+  `/api/health` against live Postgres + Redis (`docker compose up -d` first).
+
 ## CI/CD
 
 [`.github/workflows/ci.yml`](./.github/workflows/ci.yml) runs on every push/PR to
